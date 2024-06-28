@@ -1,0 +1,22 @@
+name: Deploy Frontend
+on:
+  push:
+    branches:
+      - main
+ 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # Log into Docker
+      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      # Build the Docker image
+      - run: docker build -t plopeztheknot/frontend -f Docker/Dockerfile.dev .
+
+      # Run the test within the Docker image
+      - run: docker run -e CI=true plopeztheknot/frontend npm test
+ 
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
